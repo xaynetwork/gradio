@@ -10,7 +10,6 @@ import secrets
 import string
 import sys
 import tempfile
-import threading
 import time
 import warnings
 import webbrowser
@@ -27,7 +26,6 @@ from gradio_client import utils as client_utils
 from gradio_client.documentation import document
 
 from gradio import (
-    analytics,
     components,
     networking,
     processing_utils,
@@ -69,7 +67,6 @@ from gradio.utils import (
     component_or_layout_class,
     get_cancel_function,
     get_continuous_fn,
-    get_package_version,
 )
 
 try:
@@ -497,7 +494,6 @@ class Blocks(BlockContext, BlocksEvents, metaclass=BlocksMeta):
     def __init__(
         self,
         theme: Theme | str | None = None,
-        analytics_enabled: bool | None = None,
         mode: str = "blocks",
         title: str = "Gradio",
         css: str | None = None,
@@ -509,8 +505,7 @@ class Blocks(BlockContext, BlocksEvents, metaclass=BlocksMeta):
         """
         Parameters:
             theme: A Theme object or a string representing a theme. If a string, will look for a built-in theme with that name (e.g. "soft" or "default"), or will attempt to load a theme from the Hugging Face Hub (e.g. "gradio/monochrome"). If None, will use the Default theme.
-            analytics_enabled: Whether to allow basic telemetry. If None, will use GRADIO_ANALYTICS_ENABLED environment variable or default to True.
-            mode: A human-friendly name for the kind of Blocks or Interface being created. Used internally for analytics.
+            mode: A human-friendly name for the kind of Blocks or Interface being created.
             title: The tab title to display when this is opened in a browser window.
             css: Custom css as a string or path to a css file. This css will be included in the demo webpage.
             js: Custom js or path to js file to run when demo is first loaded. This javascript will be included in the demo webpage.
@@ -555,19 +550,7 @@ class Blocks(BlockContext, BlocksEvents, metaclass=BlocksMeta):
         else:
             self.js = js
 
-        # For analytics_enabled and allow_flagging: (1) first check for
-        # parameter, (2) check for env variable, (3) default to True/"manual"
-        self.analytics_enabled = (
-            analytics_enabled
-            if analytics_enabled is not None
-            else analytics.analytics_enabled()
-        )
-        if self.analytics_enabled:
-            if not wasm_utils.IS_WASM:
-                t = threading.Thread(target=analytics.version_check)
-                t.start()
-        else:
-            os.environ["HF_HUB_DISABLE_TELEMETRY"] = "True"
+        os.environ["HF_HUB_DISABLE_TELEMETRY"] = "True"
         super().__init__(render=False, **kwargs)
         self.blocks: dict[int, Component | Block] = {}
         self.fns: list[BlockFunction] = []
@@ -604,20 +587,6 @@ class Blocks(BlockContext, BlocksEvents, metaclass=BlocksMeta):
         self.blocked_paths = []
         self.root_path = os.environ.get("GRADIO_ROOT_PATH", "")
         self.proxy_urls = set()
-
-        if self.analytics_enabled:
-            is_custom_theme = not any(
-                self.theme.to_dict() == built_in_theme.to_dict()
-                for built_in_theme in BUILT_IN_THEMES.values()
-            )
-            data = {
-                "mode": self.mode,
-                "custom_css": self.css is not None,
-                "theme": self.theme.name,
-                "is_custom_theme": is_custom_theme,
-                "version": get_package_version(),
-            }
-            analytics.initiated_analytics(data)
 
         self.queue()
 
@@ -1644,7 +1613,6 @@ Received outputs:
             "mode": self.mode,
             "app_id": self.app_id,
             "dev_mode": self.dev_mode,
-            "analytics_enabled": self.analytics_enabled,
             "components": [],
             "css": self.css,
             "js": self.js,
@@ -2082,8 +2050,6 @@ Received outputs:
                 if not (quiet):
                     print(strings.en["SHARE_LINK_MESSAGE"])
             except (RuntimeError, httpx.ConnectError):
-                if self.analytics_enabled:
-                    analytics.error_analytics("Not able to set up tunnel")
                 self.share_url = None
                 self.share = False
                 if Path(BINARY_PATH).exists():
@@ -2164,20 +2130,6 @@ Received outputs:
             except ImportError:
                 pass
 
-        if getattr(self, "analytics_enabled", False):
-            data = {
-                "launch_method": "browser" if inbrowser else "inline",
-                "is_google_colab": self.is_colab,
-                "is_sharing_on": self.share,
-                "share_url": self.share_url,
-                "enable_queue": True,
-                "server_name": server_name,
-                "server_port": server_port,
-                "is_space": self.space_id is not None,
-                "mode": self.mode,
-            }
-            analytics.launched_analytics(self, data)
-
         # Block main thread if debug==True
         if debug or int(os.getenv("GRADIO_DEBUG", "0")) == 1 and not wasm_utils.IS_WASM:
             self.block_thread()
@@ -2208,9 +2160,7 @@ Received outputs:
             wandb: If the wandb module is provided, will integrate with it and appear on WandB dashboard
             mlflow: If the mlflow module  is provided, will integrate with the experiment and appear on ML Flow dashboard
         """
-        analytics_integration = ""
         if comet_ml is not None:
-            analytics_integration = "CometML"
             comet_ml.log_other("Created from", "Gradio")
             if self.share_url is not None:
                 comet_ml.log_text(f"gradio: {self.share_url}")
@@ -2221,7 +2171,6 @@ Received outputs:
             else:
                 raise ValueError("Please run `launch()` first.")
         if wandb is not None:
-            analytics_integration = "WandB"
             if self.share_url is not None:
                 wandb.log(
                     {
@@ -2242,14 +2191,10 @@ Received outputs:
                     "`launch(share=True)` first."
                 )
         if mlflow is not None:
-            analytics_integration = "MLFlow"
             if self.share_url is not None:
                 mlflow.log_param("Gradio Interface Share Link", self.share_url)
             else:
                 mlflow.log_param("Gradio Interface Local Link", self.local_url)
-        if self.analytics_enabled and analytics_integration:
-            data = {"integration": analytics_integration}
-            analytics.integration_analytics(data)
 
     def close(self, verbose: bool = True) -> None:
         """

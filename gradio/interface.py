@@ -106,7 +106,6 @@ class Interface(Blocks):
         flagging_options: list[str] | list[tuple[str, str]] | None = None,
         flagging_dir: str = "flagged",
         flagging_callback: FlaggingCallback | None = None,
-        analytics_enabled: bool | None = None,
         batch: bool = False,
         max_batch_size: int = 4,
         api_name: str | Literal[False] | None = "predict",
@@ -142,7 +141,6 @@ class Interface(Blocks):
             flagging_options: If provided, allows user to select from the list of options when flagging. Only applies if allow_flagging is "manual". Can either be a list of tuples of the form (label, value), where label is the string that will be displayed on the button and value is the string that will be stored in the flagging CSV; or it can be a list of strings ["X", "Y"], in which case the values will be the list of strings and the labels will ["Flag as X", "Flag as Y"], etc.
             flagging_dir: What to name the directory where flagged data is stored.
             flagging_callback: None or an instance of a subclass of FlaggingCallback which will be called when a sample is flagged. If set to None, an instance of gradio.flagging.CSVLogger will be created and logs will be saved to a local CSV file in flagging_dir. Default to None.
-            analytics_enabled: Whether to allow basic telemetry. If None, will use GRADIO_ANALYTICS_ENABLED environment variable if defined, or default to True.
             batch: If True, then the function should process a batch of inputs, meaning that it should accept a list of input values for each parameter. The lists should be of equal length (and be up to length `max_batch_size`). The function is then *required* to return a tuple of lists (even if there is only 1 output component), with each list in the tuple corresponding to one output component.
             max_batch_size: Maximum number of inputs to batch together if this is called from the queue (only relevant if batch=True)
             api_name: Defines how the endpoint appears in the API docs. Can be a string, None, or False. If set to a string, the endpoint will be exposed in the API docs with the given name. If None, the name of the prediction function will be used as the API endpoint. If False, the endpoint will not be exposed in the API docs and downstream apps (including those that `gr.load` this app) will not be able to use this event.
@@ -157,7 +155,6 @@ class Interface(Blocks):
             clear_btn: The button to use for clearing the inputs. Defaults to a `gr.Button("Clear", variant="secondary")`. Can be set to a string (which becomes the button label) or a `gr.Button` object (which allows for more customization).
         """
         super().__init__(
-            analytics_enabled=analytics_enabled,
             mode="interface",
             css=css,
             title=title or "Gradio",
@@ -866,7 +863,6 @@ class TabbedInterface(Blocks):
         tab_names: list[str] | None = None,
         title: str | None = None,
         theme: Theme | str | None = None,
-        analytics_enabled: bool | None = None,
         css: str | None = None,
         js: str | None = None,
         head: str | None = None,
@@ -877,7 +873,6 @@ class TabbedInterface(Blocks):
             tab_names: A list of tab names. If None, the tab names will be "Tab 1", "Tab 2", etc.
             title: The tab title to display when this demo is opened in a browser window.
             theme: A Theme object or a string representing a theme. If a string, will look for a built-in theme with that name (e.g. "soft" or "default"), or will attempt to load a theme from the Hugging Face Hub (e.g. "gradio/monochrome"). If None, will use the Default theme.
-            analytics_enabled: Whether to allow basic telemetry. If None, will use GRADIO_ANALYTICS_ENABLED environment variable or default to True.
             css: Custom css as a string or path to a css file. This css will be included in the demo webpage.
             js: Custom js or path to js file to run when demo is first loaded. This javascript will be included in the demo webpage.
             head: Custom html to insert into the head of the demo webpage. This can be used to add custom meta tags, scripts, stylesheets, etc. to the page.
@@ -887,7 +882,6 @@ class TabbedInterface(Blocks):
         super().__init__(
             title=title or "Gradio",
             theme=theme,
-            analytics_enabled=analytics_enabled,
             mode="tabbed_interface",
             css=css,
             js=js,

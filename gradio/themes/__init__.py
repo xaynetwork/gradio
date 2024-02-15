@@ -5,7 +5,7 @@ from gradio.themes.monochrome import Monochrome
 from gradio.themes.soft import Soft
 from gradio.themes.utils import colors, sizes
 from gradio.themes.utils.colors import Color
-from gradio.themes.utils.fonts import Font, GoogleFont
+from gradio.themes.utils.fonts import Font
 from gradio.themes.utils.sizes import Size
 
 __all__ = [
@@ -14,7 +14,6 @@ __all__ = [
     "Default",
     "Font",
     "Glass",
-    "GoogleFont",
     "Monochrome",
     "Size",
     "Soft",
