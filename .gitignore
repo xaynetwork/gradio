@@ -12,7 +12,7 @@ __tmp/*
 py.typed
 
 # JS build
-gradio/templates/*
+# gradio/templates/*
 gradio/node/*
 gradio/_frontend_code/*
 js/gradio-preview/test/*
