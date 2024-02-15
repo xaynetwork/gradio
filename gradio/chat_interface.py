@@ -68,7 +68,6 @@ class ChatInterface(Blocks):
         css: str | None = None,
         js: str | None = None,
         head: str | None = None,
-        analytics_enabled: bool | None = None,
         submit_btn: str | None | Button = "Submit",
         stop_btn: str | None | Button = "Stop",
         retry_btn: str | None | Button = "🔄  Retry",
@@ -94,7 +93,6 @@ class ChatInterface(Blocks):
             css: Custom css as a string or path to a css file. This css will be included in the demo webpage.
             js: Custom js or path to js file to run when demo is first loaded. This javascript will be included in the demo webpage.
             head: Custom html to insert into the head of the demo webpage. This can be used to add custom meta tags, scripts, stylesheets, etc. to the page.
-            analytics_enabled: Whether to allow basic telemetry. If None, will use GRADIO_ANALYTICS_ENABLED environment variable if defined, or default to True.
             submit_btn: Text to display on the submit button. If None, no button will be displayed. If a Button object, that button will be used.
             stop_btn: Text to display on the stop button, which replaces the submit_btn when the submit_btn or retry_btn is clicked and response is streaming. Clicking on the stop_btn will halt the chatbot response. If set to None, stop button functionality does not appear in the chatbot. If a Button object, that button will be used as the stop button.
             retry_btn: Text to display on the retry button. If None, no button will be displayed. If a Button object, that button will be used.
@@ -105,7 +103,6 @@ class ChatInterface(Blocks):
             fill_height: If True, the chat interface will expand to the height of window.
         """
         super().__init__(
-            analytics_enabled=analytics_enabled,
             mode="chat_interface",
             css=css,
             title=title or "Gradio",

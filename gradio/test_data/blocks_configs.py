@@ -2,7 +2,6 @@ XRAY_CONFIG = {
     "version": "3.40.1",
     "mode": "blocks",
     "dev_mode": True,
-    "analytics_enabled": False,
     "components": [
         {
             "id": 31,
@@ -350,7 +349,6 @@ XRAY_CONFIG_DIFF_IDS = {
     "version": "3.32.0\n",
     "mode": "blocks",
     "dev_mode": True,
-    "analytics_enabled": False,
     "components": [
         {
             "id": 1,
@@ -698,7 +696,6 @@ XRAY_CONFIG_DIFF_IDS = {
 XRAY_CONFIG_WITH_MISTAKE = {
     "mode": "blocks",
     "dev_mode": True,
-    "analytics_enabled": False,
     "theme": "default",
     "components": [
         {

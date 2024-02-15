@@ -34,7 +34,3 @@ def get_updated_messaging(en: Dict):
         en.update(updated_messaging)
     except Exception:  # Use default messaging
         pass
-
-
-if os.getenv("GRADIO_ANALYTICS_ENABLED", "True") == "True" and not wasm_utils.IS_WASM:
-    threading.Thread(target=get_updated_messaging, args=(en,)).start()
