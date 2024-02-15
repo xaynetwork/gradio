@@ -856,7 +856,6 @@ with gr.Blocks(
     css=abs_path,
     theme=gr.themes.Default(
         font_mono=[
-            gr.themes.GoogleFont("Inconsolata"),
             "monospace",
         ],
     ),

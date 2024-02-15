@@ -199,26 +199,21 @@ with gr.Blocks(  # noqa: SIM117
                     gr.Markdown(
                         """Set the main `font` and the monospace `font_mono` here.
                         Set up to 4 values for each (fallbacks in case a font is not available).
-                        Check "Google Font" if font should be loaded from Google Fonts.
                         """
                     )
                     gr.Markdown("### Main Font")
-                    main_fonts, main_is_google = [], []
+                    main_fonts = []
                     for i in range(4):
                         with gr.Row():
                             font = gr.Textbox(label=f"Font {i + 1}")
-                            font_is_google = gr.Checkbox(label="Google Font")
                             main_fonts.append(font)
-                            main_is_google.append(font_is_google)
 
-                    mono_fonts, mono_is_google = [], []
+                    mono_fonts = []
                     gr.Markdown("### Monospace Font")
                     for i in range(4):
                         with gr.Row():
                             font = gr.Textbox(label=f"Font {i + 1}")
-                            font_is_google = gr.Checkbox(label="Google Font")
                             mono_fonts.append(font)
-                            mono_is_google.append(font_is_google)
 
                 theme_var_input = []
 
@@ -486,9 +481,7 @@ with gr.Blocks(  # noqa: SIM117
             + spacing_sizes
             + radius_sizes
             + main_fonts
-            + main_is_google
             + mono_fonts
-            + mono_is_google
             + theme_var_input
         )
 
@@ -507,10 +500,6 @@ with gr.Blocks(  # noqa: SIM117
 
             font = theme._font[:4]
             font_mono = theme._font_mono[:4]
-            font_is_google = [isinstance(f, gr.themes.GoogleFont) for f in font]
-            font_mono_is_google = [
-                isinstance(f, gr.themes.GoogleFont) for f in font_mono
-            ]
 
             def pad_to_4(x):
                 return x + [None] * (4 - len(x))
@@ -532,9 +521,7 @@ with gr.Blocks(  # noqa: SIM117
                 + spacing_size.expand()
                 + radius_size.expand()
                 + pad_to_4([f.name for f in font])
-                + pad_to_4(font_is_google)
                 + pad_to_4([f.name for f in font_mono])
-                + pad_to_4(font_mono_is_google)
                 + var_output
             )
 
@@ -632,16 +619,10 @@ with gr.Blocks(  # noqa: SIM117
                 (font_mono, final_mono_fonts, "font_mono"),
             ]:
                 if len(base_font_set) != len(theme_font_set) or any(
-                    base_font.name != theme_font[0]
-                    or isinstance(base_font, gr.themes.GoogleFont) != theme_font[1]
+                    base_font.name != theme_font
                     for base_font, theme_font in zip(base_font_set, theme_font_set)
                 ):
-                    font_diffs[font_set_name] = [
-                        f"gr.themes.GoogleFont('{font_name}')"
-                        if is_google_font
-                        else f"'{font_name}'"
-                        for font_name, is_google_font in theme_font_set
-                    ]
+                    font_diffs[font_set_name] = [f"'{font_name}'" for font_name in theme_font_set]
 
             newline = "\n"
 
@@ -723,26 +704,14 @@ with gr.Blocks(theme=theme) as demo:
                 + 3 * len(size_range)
                 + 4
             ]
-            main_is_google = args[
+            mono_fonts = args[
                 6 + 3 * len(palette_range) + 3 * len(size_range) + 4 : 6
                 + 3 * len(palette_range)
                 + 3 * len(size_range)
                 + 8
             ]
-            mono_fonts = args[
-                6 + 3 * len(palette_range) + 3 * len(size_range) + 8 : 6
-                + 3 * len(palette_range)
-                + 3 * len(size_range)
-                + 12
-            ]
-            mono_is_google = args[
-                6 + 3 * len(palette_range) + 3 * len(size_range) + 12 : 6
-                + 3 * len(palette_range)
-                + 3 * len(size_range)
-                + 16
-            ]
             remaining_args = args[
-                6 + 3 * len(palette_range) + 3 * len(size_range) + 16 :
+                6 + 3 * len(palette_range) + 3 * len(size_range) + 8 :
             ]
 
             final_primary_color = gr.themes.Color(*primary_hues)
@@ -759,18 +728,14 @@ with gr.Blocks(theme=theme) as demo:
                     font_weights.add(val)
             font_weights = sorted(font_weights)
 
-            for main_font, is_google in zip(main_fonts, main_is_google):
+            for main_font in main_fonts:
                 if not main_font:
                     continue
-                if is_google:
-                    main_font = gr.themes.GoogleFont(main_font, weights=font_weights)
                 final_main_fonts.append(main_font)
             final_mono_fonts = []
-            for mono_font, is_google in zip(mono_fonts, mono_is_google):
+            for mono_font in mono_fonts:
                 if not mono_font:
                     continue
-                if is_google:
-                    mono_font = gr.themes.GoogleFont(mono_font, weights=font_weights)
                 final_mono_fonts.append(mono_font)
 
             theme = gr.themes.Base(
@@ -804,8 +769,8 @@ with gr.Blocks(theme=theme) as demo:
                         spacing_size,
                         radius_size,
                     ),
-                    list(zip(main_fonts, main_is_google)),
-                    list(zip(mono_fonts, mono_is_google)),
+                    main_fonts,
+                    mono_fonts,
                 ),
                 theme,
             )
@@ -822,14 +787,6 @@ with gr.Blocks(theme=theme) as demo:
                 None,
                 js="""(css, fonts) => {
                     document.getElementById('theme_css').innerHTML = css;
-                    let existing_font_links = document.querySelectorAll('link[rel="stylesheet"][href^="https://fonts.googleapis.com/css"]');
-                    existing_font_links.forEach(link => {
-                        if (fonts.includes(link.href)) {
-                            fonts = fonts.filter(font => font != link.href);
-                        } else {
-                            link.remove();
-                        }
-                    });
                     fonts.forEach(font => {
                         let link = document.createElement('link');
                         link.rel = 'stylesheet';
@@ -895,8 +852,6 @@ with gr.Blocks(theme=theme) as demo:
         for theme_box in theme_var_input:
             attach_rerender(theme_box.blur)
             attach_rerender(theme_box.select)
-        for checkbox in main_is_google + mono_is_google:
-            attach_rerender(checkbox.select)
 
         dark_mode_btn.click(
             None,
