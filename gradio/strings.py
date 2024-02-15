@@ -1,10 +1,6 @@
-import os
-import threading
 from typing import Dict
 
 import httpx
-
-from gradio import wasm_utils
 
 MESSAGING_API_ENDPOINT = "https://api.gradio.app/gradio-messaging/en"
 

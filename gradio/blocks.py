@@ -10,7 +10,6 @@ import secrets
 import string
 import sys
 import tempfile
-import threading
 import time
 import warnings
 import webbrowser
@@ -68,7 +67,6 @@ from gradio.utils import (
     component_or_layout_class,
     get_cancel_function,
     get_continuous_fn,
-    get_package_version,
 )
 
 try:

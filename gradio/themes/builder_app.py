@@ -622,7 +622,9 @@ with gr.Blocks(  # noqa: SIM117
                     base_font.name != theme_font
                     for base_font, theme_font in zip(base_font_set, theme_font_set)
                 ):
-                    font_diffs[font_set_name] = [f"'{font_name}'" for font_name in theme_font_set]
+                    font_diffs[font_set_name] = [
+                        f"'{font_name}'" for font_name in theme_font_set
+                    ]
 
             newline = "\n"
 
